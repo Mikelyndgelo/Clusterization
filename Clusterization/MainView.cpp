@@ -6,7 +6,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QColor>
-#include <QApplication>
+
+#include "SettingClusteringView.h"
 
 
 MainView::MainView(QWidget *parent):
@@ -21,6 +22,8 @@ void MainView::setUpUi()
     setMinimumSize(QSize(400, 400));
     buttonOpenFile = new QPushButton("Открыть файл");
     buttonSwithMaps = new QPushButton("Сменить карту");
+    buttonClustering = new QPushButton("Кластеризация");
+    buttonSave = new QPushButton("Сохранить");
 
     sceneHeatMap = new QGraphicsScene(this);
     viewHeatMap = new QGraphicsView(sceneHeatMap);
@@ -31,7 +34,9 @@ void MainView::setUpUi()
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
     buttonsLayout->addWidget(buttonOpenFile);
+    buttonsLayout->addWidget(buttonClustering);
     buttonsLayout->addWidget(buttonSwithMaps);
+    buttonsLayout->addWidget(buttonSave);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addLayout(buttonsLayout);
@@ -43,6 +48,8 @@ void MainView::setUpConnections()
 {
     connect(buttonOpenFile, &QPushButton::clicked, this, &MainView::onOpenFileClicked);
     connect(buttonSwithMaps, &QPushButton::clicked, this, &MainView::switchMap);
+    connect(buttonClustering, &QPushButton::clicked, this, &MainView::onClusterintClicked);
+    connect(buttonSave, &QPushButton::clicked, this, &MainView::onSaveFileClicked);
 }
 
 void MainView::onOpenFileClicked()
@@ -51,12 +58,12 @@ void MainView::onOpenFileClicked()
             "Выберите файл",
             "",
             "DAT файлы (*.dat)");
-    emit openFileClicked(filePath);
+    if (!filePath.isEmpty())
+        emit openFileClicked(filePath);
 }
 
-void MainView::showHeatMap(const QVector<Point> &points)
+void MainView::drawHeatMap(const QVector<Point> &points)
 {
-    QApplication::setOverrideCursor(Qt::WaitCursor);
     sceneHeatMap->clear();
     for (const auto &point: points) {
         QColor color;
@@ -66,16 +73,16 @@ void MainView::showHeatMap(const QVector<Point> &points)
             color = QColor(Qt::black);
         sceneHeatMap->addEllipse(point.x, point.y, 1, 1, color, QBrush(Qt::white));
     }
-    QApplication::restoreOverrideCursor();
 }
 
 void MainView::drawContours(const QVector<Point> &points)
 {
-     QPolygonF contour;
-     for (const auto &point : points) {
-         contour << QPointF(point.x, point.y);
-     }
-     sceneCountur->addPolygon(contour, QPen(Qt::black), QBrush(Qt::NoBrush));
+    sceneCountur->clear();
+    QPolygonF contour;
+    for (const auto &point : points) {
+     contour << QPointF(point.x, point.y);
+    }
+    sceneCountur->addPolygon(contour, QPen(Qt::black), QBrush(Qt::NoBrush));
 }
 
 QColor MainView::getColorFromValue(double value)
@@ -88,17 +95,29 @@ QColor MainView::getColorFromValue(double value)
 void MainView::switchMap()
 {
     buttonSwithMaps->setEnabled(false);
-    if (viewCountur->isHidden())
-    {
-        viewHeatMap->hide();
-        viewCountur->show();
-    }
-    else
-    {
-        viewCountur->hide();
-        viewHeatMap->show();
-    }
+    viewHeatMap->setVisible(!viewHeatMap->isVisible());
+    viewCountur->setVisible(!viewCountur->isVisible());
     buttonSwithMaps->setEnabled(true);
+}
+
+void MainView::onClusterintClicked()
+{
+    SettingClusteringView dialog(this);
+    int res = dialog.exec();
+    if (res == QDialog::Accepted)
+    {
+       emit clusterizationClicked(dialog.getCountClasters(),
+                                  dialog.getMaxIterations());
+    }
+}
+
+void MainView::onSaveFileClicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this, "Сохранить файл", "", "DAT Files (*.dat);)");
+
+    if (!filename.isEmpty()) {
+        emit saveFileClicked(filename);
+    }
 }
 
 

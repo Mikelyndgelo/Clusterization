@@ -6,11 +6,13 @@
 class QAbstractButton;
 class QGraphicsScene;
 class QGraphicsView;
+class QSpinBox;
 
 struct Point {
     double x;
     double y;
     QVector<double> attributes;
+    int cluster = -1;
 };
 
 
@@ -20,14 +22,19 @@ class MainView: public QFrame
 public:
     MainView(QWidget *parent = nullptr);
 
-    void showHeatMap(const QVector<Point> &points);
+    void drawHeatMap(const QVector<Point> &points);
     void drawContours(const QVector<Point> &points);
 
 signals:
     void openFileClicked(const QString &path);
+    void clusterizationClicked(const int countClusters,
+                               const int maxIterations);
+    void saveFileClicked(const QString &filePath);
 
 private slots:
     void onOpenFileClicked();
+    void onClusterintClicked();
+    void onSaveFileClicked();
 
 private:
     void setUpUi();
@@ -38,12 +45,16 @@ private:
 
     QAbstractButton *buttonOpenFile;
     QAbstractButton *buttonSwithMaps;
+    QAbstractButton *buttonClustering;
+    QAbstractButton *buttonSave;
 
     QGraphicsScene *sceneHeatMap;
     QGraphicsView *viewHeatMap;
 
     QGraphicsScene *sceneCountur;
     QGraphicsView *viewCountur;
+
+    QSpinBox *countClasters;
 };
 
 #endif // MAINVIEW_H

@@ -17,12 +17,14 @@ find_package(Qt5 REQUIRED COMPONENTS Widgets)
 set(CLUSTERIZATION_H
     MainLogic.h
     MainView.h
+    SettingClusteringView.h
 )
 
 set(CLUSTERIZATION_CPP
     main.cpp
     MainLogic.cpp
     MainView.cpp
+    SettingClusteringView.cpp
 )
 
 add_executable(Clusterization
