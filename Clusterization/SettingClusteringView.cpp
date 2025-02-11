@@ -13,6 +13,7 @@ SettingClusteringView::SettingClusteringView(QWidget *parent)
 
 void SettingClusteringView::setUpUi()
 {
+    setMinimumSize(QSize(200, 100));
     setWindowTitle("Параметры кластеризации");
 
     labelClusterCounts = new QLabel("Количество кластеров");
