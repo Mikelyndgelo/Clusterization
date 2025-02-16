@@ -2,7 +2,7 @@
 
 #include "MainView.h"
 
-#include <QFile>
+#include <QSaveFile>
 #include <QTextStream>
 #include <QApplication>
 #include <QRandomGenerator>
@@ -62,12 +62,7 @@ void MainLogic::openFile(const QString &path)
 
 void MainLogic::onClusterizationClicked(const int countClusters, const int maxIterations)
 {
-    mainView->setEnabled(false);
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    auto temp = m_points;
     clustering(m_points, countClusters, maxIterations);
-    QApplication::restoreOverrideCursor();
-    mainView->setEnabled(true);
 
     mainView->drawHeatMap(m_points);
     mainView->drawContours(m_points);
@@ -75,8 +70,14 @@ void MainLogic::onClusterizationClicked(const int countClusters, const int maxIt
 
 void MainLogic::clustering(QVector<Point> &points, int clusterCount, int maxIterations)
 {
-    if (points.isEmpty() || clusterCount <= 0)
+    if (points.isEmpty())
+    {
+        QMessageBox::warning(mainView, "Ошибка", "Нет данных для кластеризации.");
         return;
+    }
+
+    mainView->setEnabled(false);
+    QApplication::setOverrideCursor(Qt::WaitCursor);
 
     QVector<Point> centroids;
     for (int i = 0; i < clusterCount; ++i)
@@ -137,14 +138,24 @@ void MainLogic::clustering(QVector<Point> &points, int clusterCount, int maxIter
         }
         centroids = newCentroids;
     }
+
+    QApplication::restoreOverrideCursor();
+    mainView->setEnabled(true);
     QMessageBox::warning(mainView, "", "Кластеризация завершена, вы можете сохранить результаты");
 }
 
 void MainLogic::saveFile(const QString& filename)
 {
-    QFile file(filename);
+    if (m_points.isEmpty())
+    {
+        QMessageBox::warning(mainView, "Ошибка", "Нет данных для экспорта.");
+        return;
+    }
 
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    QSaveFile file(filename);
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
         QMessageBox::warning(mainView, "Ошибка", "Ошибка при экспорте данных.");
         return;
     }
@@ -152,17 +163,15 @@ void MainLogic::saveFile(const QString& filename)
     QTextStream out(&file);
 
     for (const Point& point: m_points) {
-        out << point.x << " " << point.y << " " << point.cluster << " ";
-
-        for (int i = 0; i < point.attributes.size(); ++i) {
-            out << point.attributes[i];
-            if (i < point.attributes.size() - 1) {
-                out << " ";
-            }
+        out << point.cluster << " ";
+        if (out.status() != QTextStream::Ok) {
+            QMessageBox::warning(mainView, "Ошибка", "Ошибка записи в файл.");
+            return;
         }
-        out << "\n";
     }
-    QMessageBox::information(mainView, "Успех", "Данные успешно экспортированы в " + filename);
 
-    file.close();
+    if (!file.commit()) {
+        QMessageBox::warning(mainView, "Ошибка", "Ошибка при сохранении файла.");
+        return;
+    }
 }

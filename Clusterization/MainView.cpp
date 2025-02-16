@@ -19,13 +19,14 @@ MainView::MainView(QWidget *parent):
 
 void MainView::setUpUi()
 {
+    heatMapPainter = new PointsWidget();
     setMinimumSize(QSize(400, 400));
     buttonOpenFile = new QPushButton("Открыть файл");
     buttonSwithMaps = new QPushButton("Сменить карту");
     buttonSave = new QPushButton("Сохранить");
 
     countClasters = new QSpinBox();
-    countClasters->setRange(1, 10);
+    countClasters->setRange(1, 4);
     countClasters->setValue(1);
 
     QHBoxLayout *layClasters = new QHBoxLayout();
@@ -42,13 +43,6 @@ void MainView::setUpUi()
 
     buttonClusterization = new QPushButton("Запустить кластеризацию");
 
-    sceneHeatMap = new QGraphicsScene(this);
-    viewHeatMap = new QGraphicsView(sceneHeatMap);
-
-    sceneCountur = new QGraphicsScene(this);
-    viewCountur = new QGraphicsView(sceneCountur);
-    viewCountur->hide();
-
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
     buttonsLayout->addWidget(buttonOpenFile);
     buttonsLayout->addWidget(buttonSwithMaps);
@@ -59,8 +53,8 @@ void MainView::setUpUi()
     layout->addLayout(layIterations);
     layout->addLayout(layClasters);
     layout->addWidget(buttonClusterization);
-    layout->addWidget(viewHeatMap);
-    layout->addWidget(viewCountur);
+//    layout->addWidget(viewCountur);
+    layout->addWidget(heatMapPainter);
 }
 
 void MainView::setUpConnections()
@@ -86,25 +80,17 @@ void MainView::onOpenFileClicked()
 
 void MainView::drawHeatMap(const QVector<Point> &points)
 {
-    sceneHeatMap->clear();
-    for (const auto &point: points) {
-        QColor color;
-        if (!point.attributes.empty())
-            color = getColorFromValue(point.attributes[0]);
-        else
-            color = QColor(Qt::black);
-        sceneHeatMap->addEllipse(point.x, point.y, 1, 1, color, QBrush(Qt::white));
-    }
+    heatMapPainter->setPoints(points);
 }
 
 void MainView::drawContours(const QVector<Point> &points)
 {
-    sceneCountur->clear();
-    QPolygonF contour;
-    for (const auto &point : points) {
-     contour << QPointF(point.x, point.y);
-    }
-    sceneCountur->addPolygon(contour, QPen(Qt::black), QBrush(Qt::NoBrush));
+//    sceneCountur->clear();
+//    QPolygonF contour;
+//    for (const auto &point : points) {
+//     contour << QPointF(point.x, point.y);
+//    }
+//    sceneCountur->addPolygon(contour, QPen(Qt::black), QBrush(Qt::NoBrush));
 }
 
 QColor MainView::getColorFromValue(double value)
@@ -116,10 +102,10 @@ QColor MainView::getColorFromValue(double value)
 
 void MainView::switchMap()
 {
-    buttonSwithMaps->setEnabled(false);
-    viewHeatMap->setVisible(!viewHeatMap->isVisible());
-    viewCountur->setVisible(!viewCountur->isVisible());
-    buttonSwithMaps->setEnabled(true);
+//    buttonSwithMaps->setEnabled(false);
+//    viewHeatMap->setVisible(!viewHeatMap->isVisible());
+//    viewCountur->setVisible(!viewCountur->isVisible());
+//    buttonSwithMaps->setEnabled(true);
 }
 
 void MainView::onSaveFileClicked()
