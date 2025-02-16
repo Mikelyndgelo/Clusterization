@@ -17,18 +17,21 @@ struct Point {
 
 #include <QPainter>
 
-class PointsWidget : public QFrame {
+class HeatMapFrame : public QFrame {
     Q_OBJECT
 
 public:
-    PointsWidget(QWidget *parent = nullptr) : QFrame(parent) {}
+    HeatMapFrame(QWidget *parent = nullptr) : QFrame(parent) {}
 
     void setPoints(const QVector<Point> &points_)
     {
         points.clear();
+        clusters.clear();
         for (const auto &point: points_)
         {
             points << QPointF(point.x, point.y);
+            if (point.cluster != -1)
+                clusters << point.cluster;
         }
         update();
     }
@@ -41,25 +44,37 @@ protected:
         QImage image(size(), QImage::Format_ARGB32);
         image.fill(Qt::white);
 
+        QPainter painter(&image);
+        painter.setRenderHint(QPainter::Antialiasing);
+
         QRectF bounds = calculateBounds();
         qreal scaleX = width() / bounds.width();
         qreal scaleY = height() / bounds.height();
 
-        QColor pointColor = Qt::red;
+        QVector<QColor> clusterColors = {
+            Qt::blue, Qt::green, Qt::yellow, Qt::magenta,
+            Qt::cyan, Qt::darkRed, Qt::darkBlue, Qt::darkGreen, Qt::darkYellow
+        };
 
-        for (const QPointF &point : points)
+        for (int i = 0; i < points.size(); ++i)
         {
+            const QPointF &point = points[i];
+
+            QColor pointColor;
+            if (points.size() != clusters.size())
+                pointColor = Qt::red;
+            else
+                pointColor = clusterColors[clusters[i] % clusterColors.size()];
+
             int x = (point.x() - bounds.left()) * scaleX;
             int y = (point.y() - bounds.top()) * scaleY;
 
             if (x >= 0 && x < image.width() && y >= 0 && y < image.height())
-            {
                 image.setPixel(x, y, pointColor.rgba());
-            }
         }
 
-        QPainter painter(this);
-        painter.drawImage(0, 0, image);
+        QPainter framePainter(this);
+        framePainter.drawImage(0, 0, image);
     }
 
     void resizeEvent(QResizeEvent *event) override
@@ -77,6 +92,7 @@ protected:
 
 private:
     QVector<QPointF> points;
+    QVector<int> clusters;
 
     QRectF calculateBounds() const
     {
@@ -144,7 +160,7 @@ private:
     QSpinBox *maxIterations;
     QSpinBox *countClasters;
 
-    PointsWidget *heatMapPainter;
+    HeatMapFrame *heatMapPainter;
 };
 
 #endif // MAINVIEW_H

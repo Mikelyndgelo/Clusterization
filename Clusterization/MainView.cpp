@@ -19,7 +19,7 @@ MainView::MainView(QWidget *parent):
 
 void MainView::setUpUi()
 {
-    heatMapPainter = new PointsWidget();
+    heatMapPainter = new HeatMapFrame();
     setMinimumSize(QSize(400, 400));
     buttonOpenFile = new QPushButton("Открыть файл");
     buttonSwithMaps = new QPushButton("Сменить карту");
