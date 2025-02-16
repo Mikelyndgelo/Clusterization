@@ -137,6 +137,7 @@ void MainLogic::clustering(QVector<Point> &points, int clusterCount, int maxIter
         }
         centroids = newCentroids;
     }
+    QMessageBox::warning(mainView, "", "Кластеризация завершена, вы можете сохранить результаты");
 }
 
 void MainLogic::saveFile(const QString& filename)

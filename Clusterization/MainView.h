@@ -33,7 +33,6 @@ signals:
 
 private slots:
     void onOpenFileClicked();
-    void onClusterintClicked();
     void onSaveFileClicked();
 
 private:
@@ -45,8 +44,8 @@ private:
 
     QAbstractButton *buttonOpenFile;
     QAbstractButton *buttonSwithMaps;
-    QAbstractButton *buttonClustering;
     QAbstractButton *buttonSave;
+    QAbstractButton *buttonClusterization;
 
     QGraphicsScene *sceneHeatMap;
     QGraphicsView *viewHeatMap;
@@ -54,6 +53,7 @@ private:
     QGraphicsScene *sceneCountur;
     QGraphicsView *viewCountur;
 
+    QSpinBox *maxIterations;
     QSpinBox *countClasters;
 };
 

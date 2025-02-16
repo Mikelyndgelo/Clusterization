@@ -6,8 +6,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QColor>
-
-#include "SettingClusteringView.h"
+#include <QLabel>
+#include <QSpinBox>
 
 
 MainView::MainView(QWidget *parent):
@@ -22,8 +22,25 @@ void MainView::setUpUi()
     setMinimumSize(QSize(400, 400));
     buttonOpenFile = new QPushButton("Открыть файл");
     buttonSwithMaps = new QPushButton("Сменить карту");
-    buttonClustering = new QPushButton("Кластеризация");
     buttonSave = new QPushButton("Сохранить");
+
+    countClasters = new QSpinBox();
+    countClasters->setRange(1, 10);
+    countClasters->setValue(1);
+
+    QHBoxLayout *layClasters = new QHBoxLayout();
+    layClasters->addWidget(new QLabel("Количество кластеров"));
+    layClasters->addWidget(countClasters);
+
+    maxIterations = new QSpinBox();
+    maxIterations->setRange(1, 100);
+    maxIterations->setValue(100);
+
+    QHBoxLayout *layIterations = new QHBoxLayout();
+    layIterations->addWidget(new QLabel("Макс. количество итераций"));
+    layIterations->addWidget(maxIterations);
+
+    buttonClusterization = new QPushButton("Запустить кластеризацию");
 
     sceneHeatMap = new QGraphicsScene(this);
     viewHeatMap = new QGraphicsView(sceneHeatMap);
@@ -34,12 +51,14 @@ void MainView::setUpUi()
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
     buttonsLayout->addWidget(buttonOpenFile);
-    buttonsLayout->addWidget(buttonClustering);
     buttonsLayout->addWidget(buttonSwithMaps);
     buttonsLayout->addWidget(buttonSave);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addLayout(buttonsLayout);
+    layout->addLayout(layIterations);
+    layout->addLayout(layClasters);
+    layout->addWidget(buttonClusterization);
     layout->addWidget(viewHeatMap);
     layout->addWidget(viewCountur);
 }
@@ -48,7 +67,10 @@ void MainView::setUpConnections()
 {
     connect(buttonOpenFile, &QPushButton::clicked, this, &MainView::onOpenFileClicked);
     connect(buttonSwithMaps, &QPushButton::clicked, this, &MainView::switchMap);
-    connect(buttonClustering, &QPushButton::clicked, this, &MainView::onClusterintClicked);
+    connect(buttonClusterization, &QPushButton::clicked, [&](){
+        emit clusterizationClicked(countClasters->value(),
+                                   maxIterations->value());
+    });
     connect(buttonSave, &QPushButton::clicked, this, &MainView::onSaveFileClicked);
 }
 
@@ -98,17 +120,6 @@ void MainView::switchMap()
     viewHeatMap->setVisible(!viewHeatMap->isVisible());
     viewCountur->setVisible(!viewCountur->isVisible());
     buttonSwithMaps->setEnabled(true);
-}
-
-void MainView::onClusterintClicked()
-{
-    SettingClusteringView dialog(this);
-    int res = dialog.exec();
-    if (res == QDialog::Accepted)
-    {
-       emit clusterizationClicked(dialog.getCountClasters(),
-                                  dialog.getMaxIterations());
-    }
 }
 
 void MainView::onSaveFileClicked()
