@@ -16,13 +16,18 @@ find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
 set(CLUSTERIZATION_H
     MainLogic.h
+    Point.h
     MainView.h
+    HeatMapFrame.h
+    ContourMapFrame.h
 )
 
 set(CLUSTERIZATION_CPP
     main.cpp
     MainLogic.cpp
     MainView.cpp
+    HeatMapFrame.cpp
+    ContourMapFrame.cpp
 )
 
 add_executable(Clusterization

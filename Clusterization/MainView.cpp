@@ -1,5 +1,8 @@
 #include "MainView.h"
 
+#include "ContourMapFrame.h"
+#include "HeatMapFrame.h"
+
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QFileDialog>
@@ -19,7 +22,9 @@ MainView::MainView(QWidget *parent):
 
 void MainView::setUpUi()
 {
-    heatMapPainter = new HeatMapFrame();
+    heatMap = new HeatMapFrame(this);
+    counturMap = new ContourMapFrame(this);
+    counturMap->hide();
     setMinimumSize(QSize(400, 400));
     buttonOpenFile = new QPushButton("Открыть файл");
     buttonSwithMaps = new QPushButton("Сменить карту");
@@ -53,8 +58,8 @@ void MainView::setUpUi()
     layout->addLayout(layIterations);
     layout->addLayout(layClasters);
     layout->addWidget(buttonClusterization);
-//    layout->addWidget(viewCountur);
-    layout->addWidget(heatMapPainter);
+    layout->addWidget(counturMap);
+    layout->addWidget(heatMap);
 }
 
 void MainView::setUpConnections()
@@ -80,17 +85,12 @@ void MainView::onOpenFileClicked()
 
 void MainView::drawHeatMap(const QVector<Point> &points)
 {
-    heatMapPainter->setPoints(points);
+    heatMap->setPoints(points);
 }
 
 void MainView::drawContours(const QVector<Point> &points)
 {
-//    sceneCountur->clear();
-//    QPolygonF contour;
-//    for (const auto &point : points) {
-//     contour << QPointF(point.x, point.y);
-//    }
-//    sceneCountur->addPolygon(contour, QPen(Qt::black), QBrush(Qt::NoBrush));
+    counturMap->setPoints(points);
 }
 
 QColor MainView::getColorFromValue(double value)
@@ -102,10 +102,16 @@ QColor MainView::getColorFromValue(double value)
 
 void MainView::switchMap()
 {
-//    buttonSwithMaps->setEnabled(false);
-//    viewHeatMap->setVisible(!viewHeatMap->isVisible());
-//    viewCountur->setVisible(!viewCountur->isVisible());
-//    buttonSwithMaps->setEnabled(true);
+    if (heatMap->isVisible())
+    {
+        heatMap->hide();
+        counturMap->show();
+    }
+    else
+    {
+        counturMap->hide();
+        heatMap->show();
+    }
 }
 
 void MainView::onSaveFileClicked()
